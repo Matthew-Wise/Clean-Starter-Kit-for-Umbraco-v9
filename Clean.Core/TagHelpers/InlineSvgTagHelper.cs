@@ -225,10 +225,14 @@ namespace Clean.Core.TagHelpers
             return cleanedFileContents;
         }
 
-        internal static decimal GetDecimal(object input, decimal defaultValue = 0)
+        private static decimal GetDecimal(object input, decimal defaultValue = 0)
         {
-            decimal value = decimal.MinValue;
-            decimal.TryParse(input != null ? input.ToString().Replace("£", "") : "", out value);
+            var strInput = input?.ToString()?.Replace("£", "");
+            if (string.IsNullOrWhiteSpace(strInput))
+            {
+                return decimal.MinValue;
+            }
+            decimal.TryParse(strInput, out var value);
 
             if (value > decimal.MinValue)
             {

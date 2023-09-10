@@ -1,12 +1,8 @@
-﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<ContentModels.Search>
-
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<SearchViewModel>
 @using Clean.Core.Models.ViewModels
-@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels
-@inject Umbraco.Cms.Core.IPublishedContentQuery publishedContentQuery
 
 @{ 
     Layout = "master.cshtml";
-    var searchQuery = Context.Request.Query["q"]; 
 }
 
 @await Html.PartialAsync("~/Views/Partials/pageHeader.cshtml", new PageHeaderViewModel(Model.Name, Model.Title, Model.Subtitle, Model.MainImage))
@@ -16,7 +12,7 @@
         <div class="row">
             <div class="col-lg-8 col-md-10 mx-auto">
                 <div class="form-group controls">
-                    <input type="text" class="form-control col-xs-6" placeholder="@Umbraco.GetDictionaryValue("Search.Placeholder")" name="q" value="@searchQuery" />
+                    <input type="text" class="form-control col-xs-6" placeholder="@Umbraco.GetDictionaryValue("Search.Placeholder")" name="q" value="@Model.SearchQuery" />
                 </div>
             </div>
             <div class="col-lg-8 col-md-10 mx-auto my-3">
@@ -25,13 +21,13 @@
                 </div>
             </div>
             <div class="col-lg-8 col-md-10 mx-auto">
-                @if (!string.IsNullOrWhiteSpace(searchQuery))
+                @if (!string.IsNullOrWhiteSpace(Model.SearchQuery))
                 {
-                    var results = publishedContentQuery.Search(searchQuery);
-                    long resultCount = results != null && results.Any() ? results.Count() : 0;
-                    @Html.Raw(string.Format(Umbraco.GetDictionaryValue("Search.Results"), resultCount, searchQuery)) if (resultCount > 0)
+                    var resultCount = Model.Results.Count;
+                    @Html.Raw(string.Format(Umbraco.GetDictionaryValue("Search.Results"), resultCount, Model.SearchQuery)) 
+                    if (resultCount > 0)
                     {
-                        foreach (var result in results)
+                        foreach (var result in Model.Results)
                         {
                             <div class="post-preview">
                                 <a href="@result.Content.Url()">
@@ -42,19 +38,18 @@
                                     {
                                     <h3 class="post-subtitle">@(result.Content.Value<string>("subtitle"))</h3>}
                                 </a>
-                                @if (result.Content.HasProperty("authorName") && result.Content.HasValue("authorName") && !string.IsNullOrWhiteSpace(result.Content.Value<string>("authorName"))
-                                    || (result.Content.HasProperty("articleDate") && result.Content.HasValue("articleDate") && result.Content.Value<DateTime>("articleDate") > DateTime.MinValue))
+                                @if (result.Content is IArticleControls article)
                                 {
                                     <p class="post-meta">
                                         @Umbraco.GetDictionaryValue("Article.Posted")
-                                        @if (result.Content.HasProperty("authorName") && result.Content.HasValue("authorName") && !string.IsNullOrWhiteSpace(result.Content.Value<string>("authorName")))
+                                        @if (!string.IsNullOrWhiteSpace(article.AuthorName))
                                         {
-                                            @Umbraco.GetDictionaryValue("Article.By")@Html.Raw("&nbsp;")@(result.Content.Value<string>("authorName"))
+                                            @Umbraco.GetDictionaryValue("Article.By")@Html.Raw("&nbsp;")@article.AuthorName
                                         }
 
-                                        @if (result.Content.HasProperty("articleDate") && result.Content.HasValue("articleDate") && result.Content.Value<DateTime>("articleDate") > DateTime.MinValue)
+                                        @if (article.ArticleDate > DateTime.MinValue)
                                         {
-                                            @Umbraco.GetDictionaryValue("Article.On")@:&nbsp;@(result.Content.Value<DateTime>("ArticleDate").ToString("MMMM dd, yyyy"))
+                                            @Umbraco.GetDictionaryValue("Article.On")@:&nbsp;@(article.ArticleDate)
                                         }
                                     </p>
                                 }

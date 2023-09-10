@@ -56,9 +56,9 @@ namespace Clean.Core.Controllers.Surface
         {
             try
             {
-                var fromAddress = _globalSettings.Smtp.From;
+                var fromAddress = _globalSettings?.Smtp?.From;
 
-                var subject = string.Format("Enquiry from: {0} - {1}", model.Name, model.Email);
+                var subject = $"Enquiry from: {model.Name} - {model.Email}";
                 EmailMessage message = new EmailMessage(fromAddress, fromAddress, subject, model.Message, false);
                 await _emailSender.SendAsync(message, emailType: "Contact");
 

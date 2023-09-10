@@ -1,6 +1,8 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\Clean.IntegrationTests",
+    "\\Clean.IntegrationTests\\TEMP"
   ],
   "SelectedNode": "\\Clean.sln",
   "PreviewInSolutionExplorer": false
